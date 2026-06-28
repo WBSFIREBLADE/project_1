@@ -2,6 +2,8 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import logging
+from logging.handlers import TimedRotatingFileHandler
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'users',
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
@@ -117,3 +120,100 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# JWT Authentication settings
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+AUTH_USER_MODEL = "users.CustomUser"
+
+
+# logging configuration
+
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+
+    "version": 1,
+
+    "disable_existing_loggers": False,
+
+    "formatters": {
+
+        "verbose": {
+
+            "format": "[{asctime}] {levelname} {module} {message}",
+
+            "style": "{",
+
+        },
+
+        "simple": {
+
+            "format": "{levelname} {message}",
+
+            "style": "{",
+
+        },
+
+    },
+
+    "handlers": {
+
+        "console": {
+
+            "class": "logging.StreamHandler",
+
+            "formatter": "simple",
+
+        },
+
+        "file": {
+
+            "class": "logging.handlers.TimedRotatingFileHandler",
+
+            "filename": LOG_DIR / "application.log",
+
+            "when": "midnight",
+
+            "interval": 1,
+
+            "backupCount": 30,
+
+            "formatter": "verbose",
+
+            "encoding": "utf-8",
+
+        },
+
+    },
+
+    "loggers": {
+
+        "django": {
+
+            "handlers": ["console", "file"],
+
+            "level": "INFO",
+
+            "propagate": True,
+
+        },
+
+        "users": {
+
+            "handlers": ["console", "file"],
+
+            "level": "INFO",
+
+            "propagate": False,
+
+        },
+
+    },
+
+}
